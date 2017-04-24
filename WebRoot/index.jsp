@@ -55,11 +55,11 @@
 <header class="am-topbar am-topbar-fixed-top">
 	<div class="am-container">
 		<h1 class="am-topbar-brand">
-			<a href="#">聊天</a>
+			<a>与 <span id="to-user-nickname"></span> 聊天中</a>
 		</h1>
 		<div class="am-collapse am-topbar-collapse" id="collapse-head">
 			<div class="am-topbar-right">
-				<button class="am-btn am-btn-primary am-topbar-btn am-btn-sm"><span class="am-icon-close"></span> 退出</button>
+				<button id="btn-exit" class="am-btn am-btn-primary am-topbar-btn am-btn-sm"><span class="am-icon-close"></span> 退出</button>
 			</div>
 		</div>
 	</div>
@@ -133,6 +133,8 @@ function initBasicInfomation() {
     			sessionStorage.setItem("fromNickname", fromNickname);
     			sessionStorage.setItem("toUid", toUid);
     			sessionStorage.setItem("toNickname", toNickname);
+    			$("title").html("与 " + toNickname + " 聊天");
+    			$("#to-user-nickname").html(toNickname);
     			success = true;
     		} else {
     			console.log("错误代码:" + msg.msgCode);
@@ -175,6 +177,10 @@ $(document).ready(function(){
 			addMessage(obj);
 		}
     }
+    $("#btn-exit").click(function() {
+    	window.opener = null;
+    	window.close();
+    });
     
     $("#send").click(function() {
     	if (!um.hasContents()) {  // 判断消息输入框是否为空
