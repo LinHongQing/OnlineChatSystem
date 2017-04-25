@@ -110,7 +110,12 @@ public class ChatService {
 			if (targetSession == null) {//若接收者未在线, 将消息储存
 				//设置消息为他人的
 				chatInfo.setSelf(false);
+				// 储存消息
 				MessageStorage.storeUnsendMessage(fromUsrUid, toUsrUid, chatInfo);
+				// 获取未发送消息的数量
+				int count = MessageStorage.getUnreceivedMessage(fromUsrUid, toUsrUid) == null ? 0 : MessageStorage.getUnreceivedMessage(fromUsrUid, toUsrUid).size();
+				// 通知主系统
+				NotifyUnreadInfoAction.doNotify(fromUsrUid, toUsrUid, count);
 			} else {//发送消息给接收者
 				//设置消息为他人的
 				chatInfo.setSelf(false);

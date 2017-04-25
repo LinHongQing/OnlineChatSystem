@@ -61,6 +61,7 @@ public class HttpRequestUtil {
                 e2.printStackTrace();
             }
         }
+        System.out.println(result);
         return result;
     }
 
@@ -120,6 +121,7 @@ public class HttpRequestUtil {
                 ex.printStackTrace();
             }
         }
+        System.out.println(result);
         return result;
     }
 }

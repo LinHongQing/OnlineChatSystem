@@ -19,7 +19,6 @@
 	}
 	String accessCheckResult = HttpRequestUtil.sendGet(SystemConfigurationInfo.getMainSystemBasePath() + "systemapis.action",
 	"which=checkUserAccess&uid=" + fromUsrUid);
-	System.out.println(accessCheckResult);
 	Gson gson = new Gson();
 	Type resultType = new TypeToken<ResultInfo<String>>(){}.getType();
 	ResultInfo<String> result = gson.fromJson(accessCheckResult, resultType);
