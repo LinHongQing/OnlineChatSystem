@@ -16,8 +16,8 @@ import com.google.gson.Gson;
 
 import bean.ChatInfo;
 import cache.MessageStorage;
-import cache.OnlineUsers;
-import exception.IllegalEmptyStringException;
+import cache.OnlineUsersStorage;
+import exception.IllegalEmptyParameterException;
 import util.TimeUtil;
 
 @ServerEndpoint("/chat/{usrUid}/{toUsrUid}")
@@ -43,8 +43,11 @@ public class ChatService {
 			if (!sr.isOK()) {
 				System.out.println("消息发送失败!");
 				System.out.println(sr.getException().getLocalizedMessage());
-				if (!MessageStorage.storeUnsendMessage(fromUsrUid, toUsrUid, chatInfo)) {
-					System.out.println("消息暂存失败!");
+				try {
+					MessageStorage.storeUnsendMessage(fromUsrUid, toUsrUid, chatInfo);
+				} catch (IllegalEmptyParameterException e) {
+					// TODO Auto-generated catch block
+					System.out.println(e.getMessage());
 				}
 			} else {
 				System.out.println("消息发送成功!");
@@ -65,16 +68,16 @@ public class ChatService {
 		this.fromUsrUid = fromUsrUid;
 		this.toUsrUid = toUsrUid;
 		try {
-			OnlineUsers.addOnlineUser(this.fromUsrUid, session);	//将接入用户 session 添加到在线表中
+			OnlineUsersStorage.addOnlineUser(this.fromUsrUid, this.toUsrUid, session);	//将接入用户 session 添加到在线表中
 			
 			List<ChatInfo> unreceivedMessages = MessageStorage.getUnreceivedMessage(toUsrUid, fromUsrUid);	//获取当前用户暂未接收的消息
-			MessageStorage.eraseStoreMessage(toUsrUid, fromUsrUid);
 			if (unreceivedMessages != null && !unreceivedMessages.isEmpty()) {	//有未接收的消息
+				MessageStorage.eraseStoreMessage(toUsrUid, fromUsrUid);
 				System.out.println("有未发送的消息!");
 				Gson gson = new Gson();
 				session.getAsyncRemote().sendText(gson.toJson(unreceivedMessages));	//发送消息给用户
 			}
-		} catch (IllegalEmptyStringException e) {
+		} catch (IllegalEmptyParameterException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -102,7 +105,7 @@ public class ChatService {
 			//发送消息给发送者
 			session.getAsyncRemote().sendText(gson.toJson(chatInfo), new MsgSendResultHandler(fromUsrUid, toUsrUid, chatInfo));
 			//从 cache 中获取接收者的 session
-			Session targetSession = OnlineUsers.getOnlineUser(toUsrUid);
+			Session targetSession = OnlineUsersStorage.getOnlineUser(fromUsrUid, toUsrUid);
 
 			if (targetSession == null) {//若接收者未在线, 将消息储存
 				//设置消息为他人的
@@ -116,7 +119,7 @@ public class ChatService {
 		} catch (NumberFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IllegalEmptyStringException e) {
+		} catch (IllegalEmptyParameterException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -130,10 +133,10 @@ public class ChatService {
 	@OnClose
 	public void onClose(Session session){
 		try {
-			OnlineUsers.delOnlineUser(fromUsrUid);
-		} catch (IllegalEmptyStringException e) {
+			OnlineUsersStorage.delOnlineUser(fromUsrUid, toUsrUid);
+		} catch (IllegalEmptyParameterException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(e.getMessage());
 		}
 	}
 	
@@ -143,6 +146,6 @@ public class ChatService {
 	 */
 	@OnError
 	public void onError(Session session, Throwable t){
-		t.printStackTrace();
+		System.out.println(t.getMessage());
 	}
 }
