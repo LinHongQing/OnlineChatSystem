@@ -21,7 +21,7 @@ import cache.ResultCodeStorage;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import exception.IllegalEmptyStringException;
+import exception.IllegalEmptyParameterException;
 
 @WebServlet("/initUser")
 public class InitUserInfoAction extends HttpServlet {
@@ -61,7 +61,7 @@ public class InitUserInfoAction extends HttpServlet {
 			String fromUsrUid = request.getParameter("from");
 			String toUsrUid = request.getParameter("to");
 			if (fromUsrUid == null || toUsrUid == null || "".equals(fromUsrUid) || "".equals(toUsrUid)) {
-				throw new IllegalEmptyStringException("传入参数非法!");
+				throw new IllegalEmptyParameterException("传入参数非法!");
 			}
 			String initUrl = SystemConfigurationInfo.getMainSystemBasePath() + "systemapis.action";
 			String initParam = "which=getChatUsersInfo&from=" + fromUsrUid + "&to=" + toUsrUid;
@@ -87,7 +87,7 @@ public class InitUserInfoAction extends HttpServlet {
 				ResultInfo<String> rs = gson.fromJson(apiReply, resultType2);
 				sendMsgtoWeb(rs, response);
 			}
-		} catch (IllegalEmptyStringException e) {
+		} catch (IllegalEmptyParameterException e) {
 			e.printStackTrace();
 			ResultInfo<String> rs = new ResultInfo<String>();
 			rs.setMsgCode(ResultCodeStorage.code_err_missing_parameter);
